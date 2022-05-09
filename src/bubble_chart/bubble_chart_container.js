@@ -216,13 +216,8 @@ looker.plugins.visualizations.add({
             ),
         color: color,
         html: firstMeasureHtml,
-        secondmeasureRendered: second_measure_rendered_val
-          ? second_measure_rendered_val
-          : LookerCharts.Utils.textForCell(
-              config["size_by"] === undefined
-                ? row[secondMeasure.name]
-                : secondMeasureValue
-            ),
+        secondMeasureRendered: second_measure_rendered_val
+          ? second_measure_rendered_val : secondMeasureValue,
         secondMeasureHtml: secondMeasureHtml
       });
     });

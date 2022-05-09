@@ -209,7 +209,7 @@ class BubbleChart extends Component {
         let tooltip_html = "";
         tooltip_html += "<div><span>" + d.data.itemName + "<br/></span>";
         tooltip_html += "<span>   " + (d.data.html ? DOMPurify.sanitize(d.data.html) : d.data.rendered) + "<br/></span>";
-        tooltip_html += "<span>   " + (d.data.secondMeasureHtml ? DOMPurify.sanitize(d.data.secondMeasureHtml) : d.data.secondmeasureRendered) + "</span></div>";
+        tooltip_html += "<span>   " + (d.data.secondMeasureHtml ? DOMPurify.sanitize(d.data.secondMeasureHtml) : d.data.secondMeasureRendered) + "</span></div>";
 
         d3.select("#tooltip").html(tooltip_html);
 
