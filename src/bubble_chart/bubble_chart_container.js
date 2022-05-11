@@ -172,7 +172,9 @@ looker.plugins.visualizations.add({
         .join("-");
       // const secondDimensionValue = secondDimension && row[secondDimension.name].value
       const firstMeasureValue = firstMeasure && row[firstMeasure.name].value;
+      const firstMeasureHtml = firstMeasure && row[firstMeasure.name].html;
       const secondMeasureValue = secondMeasure && row[secondMeasure.name].value;
+      const secondMeasureHtml = secondMeasure && row[secondMeasure.name].html;
 
       var color =
         config["color_by"] === undefined
@@ -190,6 +192,15 @@ looker.plugins.visualizations.add({
                 ? firstMeasureValue
                 : row[config["size_by"]].value
             );
+
+      var second_measure_rendered_val = 
+        config.value_format == undefined
+          ? false
+          : SSF.format(
+              config.value_format,
+              secondMeasureValue
+            );
+
       bubbleChartData.push({
         itemName: dimensionValue,
         value:
@@ -204,6 +215,10 @@ looker.plugins.visualizations.add({
                 : row[config["size_by"]]
             ),
         color: color,
+        html: firstMeasureHtml,
+        secondMeasureRendered: second_measure_rendered_val
+          ? second_measure_rendered_val : secondMeasureValue,
+        secondMeasureHtml: secondMeasureHtml
       });
     });
 

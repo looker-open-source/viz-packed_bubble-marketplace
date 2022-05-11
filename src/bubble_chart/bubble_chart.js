@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import * as d3 from "d3";
 import styled from "styled-components";
 import "./bubble_chart_styles.css";
+import DOMPurify from 'dompurify';
 
 const BubbleChartWrapper = styled.div`
   font-family: "Roboto", "Noto Sans JP", "Noto Sans", "Noto Sans CJK KR",
@@ -205,10 +206,10 @@ class BubbleChart extends Component {
     node
       .on("mousemove", function (d) {
         d3.select("#chart").append("div").attr("id", "tooltip");
-
         let tooltip_html = "";
         tooltip_html += "<div><span>" + d.data.itemName + "<br/></span>";
-        tooltip_html += "<span>   " + d.data.rendered + "</span></div>";
+        tooltip_html += "<span>   " + (d.data.html ? DOMPurify.sanitize(d.data.html) : d.data.rendered) + "<br/></span>";
+        tooltip_html += "<span>   " + (d.data.secondMeasureHtml ? DOMPurify.sanitize(d.data.secondMeasureHtml) : d.data.secondMeasureRendered) + "</span></div>";
 
         d3.select("#tooltip").html(tooltip_html);
 
