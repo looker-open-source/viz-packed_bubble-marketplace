@@ -83,10 +83,8 @@ looker.plugins.visualizations.add({
   options: baseOptions,
 
   create: function (element, config) {
-    this.container = element;
-    this.container.className = 'packed-bubble-vis';
     // Render to the target element
-    // this.chart = ReactDOM.render(<div />, element);
+    this.chart = ReactDOM.render(<div />, element);
   },
   // Render in response to the data or settings changing
   updateAsync: function (data, element, config, queryResponse, details, done) {
