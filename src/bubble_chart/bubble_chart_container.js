@@ -1,65 +1,61 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import BubbleChart from "./bubble_chart";
-import SSF from "ssf";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import BubbleChart from './bubble_chart';
+import SSF from 'ssf';
 
 const baseOptions = {
   color_by_type: {
-    type: "string",
+    type: 'string',
     label: `Color Rule`,
-    display: "select",
-    values: [
-      { Gradient: "gradient" },
-      { Fill: "fill" },
-      { Categorical: "cat" },
-    ],
-    default: "gradient",
-    section: "Series",
+    display: 'select',
+    values: [{Gradient: 'gradient'}, {Fill: 'fill'}, {Categorical: 'cat'}],
+    default: 'gradient',
+    section: 'Series',
     order: 0,
   },
   toColor: {
-    type: "array",
-    label: "Fill Color",
-    section: "Series",
-    default: ["#7FCDAE", "#ffed6f", "#EE7772"],
-    display: "colors",
+    type: 'array',
+    label: 'Fill Color',
+    section: 'Series',
+    default: ['#7FCDAE', '#ffed6f', '#EE7772'],
+    display: 'colors',
     order: 1,
   },
   // ["#5A2FC2", "#6740C7", "#7551CC", "#8363D1", "#9174D6", "#9E85DB","#AC97E0","#BAA8E5","#C8B9EA","#D5CBEF","#E3DCF4","#F1EDF9"]
   // ["#F1EDF9", "#E3DCF4", "#D5CBEF", "#C8B9EA", "#BAA8E5", "#AC97E0", "#9E85DB", "#9174D6", "#8363D1", "#7551CC", "#6740C7", "#5A2FC2"]
   value_labels: {
-    type: "boolean",
+    type: 'boolean',
     label: `Display Labels`,
     default: true,
-    section: "Series",
+    section: 'Series',
     order: 2,
   },
   value_titles: {
-    type: "boolean",
+    type: 'boolean',
     label: `Display Values`,
     default: true,
-    section: "Series",
+    section: 'Series',
     order: 3,
   },
   value_format: {
-    type: "string",
+    type: 'string',
     label: `Value Formatting Override`,
-    placeholder: "Spreadsheet-style format code",
-    section: "Series",
+    placeholder: 'Spreadsheet-style format code',
+    section: 'Series',
     order: 7,
   },
   font_size_value: {
-    type: "string",
-    label: "Lable Font Size",
-    default: "8",
-    section: "Style",
+    type: 'string',
+    label: 'Lable Font Size',
+    default: '8',
+    section: 'Style',
     order: 4,
   },
   font_size_label: {
-    type: "string",
-    label: "Value Font Size",
-    default: "10",
-    section: "Style",
+    type: 'string',
+    label: 'Value Font Size',
+    default: '10',
+    section: 'Style',
     order: 5,
   },
   // color_application: {
@@ -78,8 +74,8 @@ const baseOptions = {
 };
 
 looker.plugins.visualizations.add({
-  id: "bubble_chart",
-  label: "Bubble Chart",
+  id: 'bubble_chart',
+  label: 'Bubble Chart',
   options: baseOptions,
 
   create: function (element, config) {
@@ -94,35 +90,35 @@ looker.plugins.visualizations.add({
     const dimensions = [].concat(
       queryResponse.fields.dimensions,
       queryResponse.fields.table_calculations.filter(
-        (calc) => calc.measure === false
+        calc => calc.measure === false
       )
     );
 
     const measures = [].concat(
       queryResponse.fields.measures,
       queryResponse.fields.table_calculations.filter(
-        (calc) => calc.measure === true
+        calc => calc.measure === true
       )
     );
 
     // Throw some errors and exit if the shape of the data isn't what this chart needs
     if (measures.length < 2) {
       this.addError({
-        title: "Too few measures",
-        message: "This chart requires at least 2 measures selected.",
+        title: 'Too few measures',
+        message: 'This chart requires at least 2 measures selected.',
       });
       return;
     }
     if (dimensions.length < 1) {
       this.addError({
-        title: "Dimensions",
-        message: "This chart requires at least 1 dimension.",
+        title: 'Dimensions',
+        message: 'This chart requires at least 1 dimension.',
       });
       return;
     }
     if (data.length === 0) {
       this.addError({
-        title: "No Results",
+        title: 'No Results',
       });
       done();
       return;
@@ -138,38 +134,37 @@ looker.plugins.visualizations.add({
     const options = baseOptions;
 
     options[`size_by`] = {
-      type: "string",
-      label: "Size by",
-      display: "select",
-      values: measures.map((measure) => ({
+      type: 'string',
+      label: 'Size by',
+      display: 'select',
+      values: measures.map(measure => ({
         [measure.label]: measure.name,
       })),
-      section: "Series",
+      section: 'Series',
       default: firstMeasure && firstMeasure.name,
       order: 5,
     };
 
     options[`color_by`] = {
-      type: "string",
-      label: "Color by",
-      display: "select",
-      values: measures.map((measure) => ({
+      type: 'string',
+      label: 'Color by',
+      display: 'select',
+      values: measures.map(measure => ({
         [measure.label]: measure.name,
       })),
-      section: "Series",
+      section: 'Series',
       default: secondMeasure && secondMeasure.name,
       order: 6,
     };
 
-    this.trigger("registerOptions", options);
+    this.trigger('registerOptions', options);
 
     data.forEach((row, index) => {
       const dimensionValue = dimensions
         .map(
-          (dimension) =>
-            row[dimension.name].rendered || row[dimension.name].value
+          dimension => row[dimension.name].rendered || row[dimension.name].value
         )
-        .join("-");
+        .join('-');
       // const secondDimensionValue = secondDimension && row[secondDimension.name].value
       const firstMeasureValue = firstMeasure && row[firstMeasure.name].value;
       const firstMeasureHtml = firstMeasure && row[firstMeasure.name].html;
@@ -177,9 +172,9 @@ looker.plugins.visualizations.add({
       const secondMeasureHtml = secondMeasure && row[secondMeasure.name].html;
 
       var color =
-        config["color_by"] === undefined
+        config['color_by'] === undefined
           ? secondMeasureValue
-          : row[config["color_by"]].value;
+          : row[config['color_by']].value;
 
       maxColor.push(color);
 
@@ -188,37 +183,35 @@ looker.plugins.visualizations.add({
           ? false
           : SSF.format(
               config.value_format,
-              config["size_by"] === undefined
+              config['size_by'] === undefined
                 ? firstMeasureValue
-                : row[config["size_by"]].value
+                : row[config['size_by']].value
             );
 
-      var second_measure_rendered_val = 
+      var second_measure_rendered_val =
         config.value_format == undefined
           ? false
-          : SSF.format(
-              config.value_format,
-              secondMeasureValue
-            );
+          : SSF.format(config.value_format, secondMeasureValue);
 
       bubbleChartData.push({
         itemName: dimensionValue,
         value:
-          config["size_by"] === undefined
+          config['size_by'] === undefined
             ? firstMeasureValue
-            : row[config["size_by"]].value,
+            : row[config['size_by']].value,
         rendered: rendered_val
           ? rendered_val
           : LookerCharts.Utils.textForCell(
-              config["size_by"] === undefined
+              config['size_by'] === undefined
                 ? row[firstMeasure.name]
-                : row[config["size_by"]]
+                : row[config['size_by']]
             ),
         color: color,
         html: firstMeasureHtml,
         secondMeasureRendered: second_measure_rendered_val
-          ? second_measure_rendered_val : secondMeasureValue,
-        secondMeasureHtml: secondMeasureHtml
+          ? second_measure_rendered_val
+          : secondMeasureValue,
+        secondMeasureHtml: secondMeasureHtml,
       });
     });
 

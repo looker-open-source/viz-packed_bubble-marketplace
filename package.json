@@ -4,10 +4,12 @@
   "description": "",
   "main": "",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "prepare": "bin/bootstrap",
+    "build": "env NODE_OPTIONS='--openssl-legacy-provider' webpack --config webpack.config.js",
     "start": "webpack-dev-server --open",
-    "watch": "webpack --config webpack.config.js --watch --progress",
-    "format": "prettier --ignore-path .gitignore --write '**/*.js'"
+    "watch": "env NODE_OPTIONS='--openssl-legacy-provider' webpack --config webpack.config.js --watch --progress",
+    "format": "prettier --ignore-path .gitignore --write 'src/**/*.js'",
+    "test": "jest"
   },
   "author": "Noah MacDonald <noahmac@google.com>",
   "private": true,
@@ -45,6 +47,7 @@
     "js-yaml": "3.13.1"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "prettier": "^2.1.2",
     "url-loader": "^4.1.1"
   }
