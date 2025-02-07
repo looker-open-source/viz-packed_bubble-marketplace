@@ -23,9 +23,9 @@ var webpackConfig = {
   plugins: [new TerserPlugin()],
   module: {
     rules: [
-      { test: /\.(js|jsx)$/, use: "babel-loader" },
-      { test: /\.css$/, loader: ["to-string-loader", "css-loader"] },
-      { test: /\.(woff|woff2|ttf|otf)$/, loader: "url-loader" },
+      { test: /\.(js|jsx)$/, use: [{loader: "babel-loader"}] },
+      { test: /\.css$/, use: [{loader: "to-string-loader"}, {loader: "css-loader"}] },
+      { test: /\.(woff|woff2|ttf|otf)$/, use: [{loader: "url-loader"}] },
     ],
   },
   stats: {},
