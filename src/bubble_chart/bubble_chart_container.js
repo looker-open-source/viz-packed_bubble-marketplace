@@ -132,9 +132,9 @@ looker.plugins.visualizations.add({
       const secondMeasure = measures[1];
 
       const bubbleChartData = [];
-      var maxColor = [];
+      const maxColor = [];
 
-      const options = baseOptions;
+      const options = { ...baseOptions };
 
       options[`size_by`] = {
         type: "string",
@@ -166,32 +166,32 @@ looker.plugins.visualizations.add({
         const dimensionValue = dimensions
           .map(
             (dimension) =>
-              row[dimension.name].rendered || row[dimension.name].value
+              row[dimension.name]?.rendered || row[dimension.name]?.value || ""
           )
           .join("-");
-        const firstMeasureValue = firstMeasure && row[firstMeasure.name].value;
-        const firstMeasureHtml = firstMeasure && row[firstMeasure.name].html;
-        const secondMeasureValue = secondMeasure && row[secondMeasure.name].value;
-        const secondMeasureHtml = secondMeasure && row[secondMeasure.name].html;
+        const firstMeasureValue = firstMeasure && row[firstMeasure.name]?.value;
+        const firstMeasureHtml = firstMeasure && row[firstMeasure.name]?.html;
+        const secondMeasureValue = secondMeasure && row[secondMeasure.name]?.value;
+        const secondMeasureHtml = secondMeasure && row[secondMeasure.name]?.html;
 
-        var color =
-          config["color_by"] === undefined
+        const color =
+          config["color_by"] === undefined || !row[config["color_by"]]
             ? secondMeasureValue
             : row[config["color_by"]].value;
 
         maxColor.push(color);
 
-        var rendered_val =
+        const rendered_val =
           config.value_format == undefined
             ? false
             : SSF.format(
                 config.value_format,
-                config["size_by"] === undefined
+                config["size_by"] === undefined || !row[config["size_by"]]
                   ? firstMeasureValue
                   : row[config["size_by"]].value
               );
 
-        var second_measure_rendered_val = 
+        const second_measure_rendered_val = 
           config.value_format == undefined
             ? false
             : SSF.format(
@@ -202,14 +202,14 @@ looker.plugins.visualizations.add({
         bubbleChartData.push({
           itemName: dimensionValue,
           value:
-            config["size_by"] === undefined
+            config["size_by"] === undefined || !row[config["size_by"]]
               ? firstMeasureValue
               : row[config["size_by"]].value,
           rendered: rendered_val
             ? rendered_val
             : LookerCharts.Utils.textForCell(
-                config["size_by"] === undefined
-                  ? row[firstMeasure.name]
+                config["size_by"] === undefined || !row[config["size_by"]]
+                  ? (row[firstMeasure.name] || {})
                   : row[config["size_by"]]
               ),
           color: color,
@@ -225,7 +225,7 @@ looker.plugins.visualizations.add({
         <BubbleChart
           config={config}
           data={bubbleChartData}
-          maxColor={Math.max.apply(null, maxColor)}
+          maxColor={Math.max(...maxColor)}
         />,
         element
       );

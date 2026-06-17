@@ -137,7 +137,7 @@ class BubbleChart extends Component {
       .on("mousemove", function (event, d) {
         d3.select(this)
           .style("stroke-width", 10) // set the stroke width
-          .style("stroke", function () {
+          .style("stroke", function (d) {
             if (config.color_by_type == "fill") {
               return config.toColor[0];
             } else if (config.color_by_type == "cat") {
@@ -150,7 +150,7 @@ class BubbleChart extends Component {
             }
           })
           .style("z-index", 10)
-          .style("stroke-opacity", function () {
+          .style("stroke-opacity", function (d) {
             return d.data.color / maxColor > 0.5
               ? d.data.color / 2 / maxColor
               : (d.data.color * 2) / maxColor;
@@ -160,7 +160,7 @@ class BubbleChart extends Component {
         d3.select(this)
           .style("z-index", 1)
           .style("stroke-width", 0)
-          .style("opacity", function () {
+          .style("opacity", function (d) {
             if (config.color_by_type == "fill") {
               return 1;
             } else if (config.color_by_type == "cat") {
@@ -199,7 +199,9 @@ class BubbleChart extends Component {
 
     node
       .on("mousemove", function (event, d) {
-        d3.select("#chart").append("div").attr("id", "tooltip");
+        if (d3.select("#tooltip").empty()) {
+          d3.select("#chart").append("div").attr("id", "tooltip");
+        }
         let tooltip_html = "";
         tooltip_html += "<div><span>" + d.data.itemName + "<br/></span>";
         tooltip_html += "<span>   " + (d.data.html ? DOMPurify.sanitize(d.data.html) : d.data.rendered) + "<br/></span>";
