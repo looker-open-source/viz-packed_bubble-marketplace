@@ -8,9 +8,10 @@ var webpackConfig = {
     packed_bubble: "./src/bubble_chart/bubble_chart_container.js",
   },
   devServer: {
-    contentBase: "./dist",
+    static: { directory: "./dist" },
   },
   output: {
+    hashFunction: 'sha256',
     filename: "packed_bubble.js",
     path: path.join(path.resolve(__dirname), "/dist"),
     library: "[name]",
