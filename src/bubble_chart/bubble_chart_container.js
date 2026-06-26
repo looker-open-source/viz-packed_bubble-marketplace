@@ -55,7 +55,7 @@ const baseOptions = {
   },
   font_size_value: {
     type: "string",
-    label: "Lable Font Size",
+    label: "Label Font Size",
     default: "8",
     section: "Style",
     order: 4,
@@ -67,19 +67,6 @@ const baseOptions = {
     section: "Style",
     order: 5,
   },
-  // color_application: {
-  //   type: 'object',
-  //   display: 'color_application',
-  //   label: 'Palette',
-  //   section: "Series",
-  // },
-  // group_by_category: {
-  //   type: 'boolean',
-  //   label: `Group by Category`,
-  //   default: true,
-  //   section: 'Series',
-  //   order: 4,
-  // },
 };
 
 looker.plugins.visualizations.add({
@@ -93,156 +80,164 @@ looker.plugins.visualizations.add({
   },
   // Render in response to the data or settings changing
   updateAsync: function (data, element, config, queryResponse, details, done) {
-    // Clear any errors from previous updates
-    this.clearErrors();
+    try {
+      // Clear any errors from previous updates
+      this.clearErrors();
 
-    // Issue identified where viz would not change with table calc filters
-    // need to supply the container with something new if we fail early and
-    // don't make it to the inteded render function.
-    // https://looker.atlassian.net/browse/DX-5779
-    if (data.length === 0) {
-      this.addError({
-        title: "No Results",
-      });
-      return;
-    }
+      // Issue identified where viz would not change with table calc filters
+      // need to supply the container with something new if we fail early and
+      // don't make it to the inteded render function.
+      // https://looker.atlassian.net/browse/DX-5779
+      if (data.length === 0) {
+        this.addError({
+          title: "No Results",
+        });
+        done();
+        return;
+      }
 
-    const dimensions = [].concat(
-      queryResponse.fields.dimensions,
-      queryResponse.fields.table_calculations.filter(
-        (calc) => calc.measure === false
-      )
-    );
-
-    const measures = [].concat(
-      queryResponse.fields.measures,
-      queryResponse.fields.table_calculations.filter(
-        (calc) => calc.measure === true
-      )
-    );
-
-    // Throw some errors and exit if the shape of the data isn't what this chart needs
-    if (measures.length < 2) {
-      this.addError({
-        title: "Too few measures",
-        message: "This chart requires at least 2 measures selected.",
-      });
-      return;
-    }
-    if (dimensions.length < 1) {
-      this.addError({
-        title: "Dimensions",
-        message: "This chart requires at least 1 dimension.",
-      });
-      return;
-    }
-
-    // const secondDimension = dimensions[1]
-    const firstMeasure = measures[0];
-    const secondMeasure = measures[1];
-
-    const bubbleChartData = [];
-    var maxColor = [];
-
-    const options = baseOptions;
-
-    options[`size_by`] = {
-      type: "string",
-      label: "Size by",
-      display: "select",
-      values: measures.map((measure) => ({
-        [measure.label]: measure.name,
-      })),
-      section: "Series",
-      default: firstMeasure && firstMeasure.name,
-      order: 5,
-    };
-
-    options[`color_by`] = {
-      type: "string",
-      label: "Color by",
-      display: "select",
-      values: measures.map((measure) => ({
-        [measure.label]: measure.name,
-      })),
-      section: "Series",
-      default: secondMeasure && secondMeasure.name,
-      order: 6,
-    };
-
-    this.trigger("registerOptions", options);
-
-    data.forEach((row, index) => {
-      const dimensionValue = dimensions
-        .map(
-          (dimension) =>
-            row[dimension.name].rendered || row[dimension.name].value
+      const dimensions = [].concat(
+        queryResponse.fields.dimensions,
+        queryResponse.fields.table_calculations.filter(
+          (calc) => calc.measure === false
         )
-        .join("-");
-      // const secondDimensionValue = secondDimension && row[secondDimension.name].value
-      const firstMeasureValue = firstMeasure && row[firstMeasure.name].value;
-      const firstMeasureHtml = firstMeasure && row[firstMeasure.name].html;
-      const secondMeasureValue = secondMeasure && row[secondMeasure.name].value;
-      const secondMeasureHtml = secondMeasure && row[secondMeasure.name].html;
+      );
 
-      var color =
-        config["color_by"] === undefined
-          ? secondMeasureValue
-          : row[config["color_by"]].value;
+      const measures = [].concat(
+        queryResponse.fields.measures,
+        queryResponse.fields.table_calculations.filter(
+          (calc) => calc.measure === true
+        )
+      );
 
-      maxColor.push(color);
+      // Throw some errors and exit if the shape of the data isn't what this chart needs
+      if (measures.length < 2) {
+        this.addError({
+          title: "Too few measures",
+          message: "This chart requires at least 2 measures selected.",
+        });
+        done();
+        return;
+      }
+      if (dimensions.length < 1) {
+        this.addError({
+          title: "Dimensions",
+          message: "This chart requires at least 1 dimension.",
+        });
+        done();
+        return;
+      }
 
-      var rendered_val =
-        config.value_format == undefined
-          ? false
-          : SSF.format(
-              config.value_format,
-              config["size_by"] === undefined
-                ? firstMeasureValue
-                : row[config["size_by"]].value
-            );
+      const firstMeasure = measures[0];
+      const secondMeasure = measures[1];
 
-      var second_measure_rendered_val = 
-        config.value_format == undefined
-          ? false
-          : SSF.format(
-              config.value_format,
-              secondMeasureValue
-            );
+      const bubbleChartData = [];
+      const maxColor = [];
 
-      bubbleChartData.push({
-        itemName: dimensionValue,
-        value:
-          config["size_by"] === undefined
-            ? firstMeasureValue
-            : row[config["size_by"]].value,
-        rendered: rendered_val
-          ? rendered_val
-          : LookerCharts.Utils.textForCell(
-              config["size_by"] === undefined
-                ? row[firstMeasure.name]
-                : row[config["size_by"]]
-            ),
-        color: color,
-        html: firstMeasureHtml,
-        secondMeasureRendered: second_measure_rendered_val
-          ? second_measure_rendered_val : secondMeasureValue,
-        secondMeasureHtml: secondMeasureHtml
+      const options = { ...baseOptions };
+
+      options[`size_by`] = {
+        type: "string",
+        label: "Size by",
+        display: "select",
+        values: measures.map((measure) => ({
+          [measure.label]: measure.name,
+        })),
+        section: "Series",
+        default: firstMeasure && firstMeasure.name,
+        order: 5,
+      };
+
+      options[`color_by`] = {
+        type: "string",
+        label: "Color by",
+        display: "select",
+        values: measures.map((measure) => ({
+          [measure.label]: measure.name,
+        })),
+        section: "Series",
+        default: secondMeasure && secondMeasure.name,
+        order: 6,
+      };
+
+      this.trigger("registerOptions", options);
+
+      data.forEach((row, index) => {
+        const dimensionValue = dimensions
+          .map(
+            (dimension) =>
+              row[dimension.name]?.rendered || row[dimension.name]?.value || ""
+          )
+          .join("-");
+        const firstMeasureValue = firstMeasure && row[firstMeasure.name]?.value;
+        const firstMeasureHtml = firstMeasure && row[firstMeasure.name]?.html;
+        const secondMeasureValue = secondMeasure && row[secondMeasure.name]?.value;
+        const secondMeasureHtml = secondMeasure && row[secondMeasure.name]?.html;
+
+        const color =
+          config["color_by"] === undefined || !row[config["color_by"]]
+            ? secondMeasureValue
+            : row[config["color_by"]].value;
+
+        maxColor.push(color);
+
+        const rendered_val =
+          config.value_format == undefined
+            ? false
+            : SSF.format(
+                config.value_format,
+                config["size_by"] === undefined || !row[config["size_by"]]
+                  ? firstMeasureValue
+                  : row[config["size_by"]].value
+              );
+
+        const second_measure_rendered_val = 
+          config.value_format == undefined
+            ? false
+            : SSF.format(
+                config.value_format,
+                secondMeasureValue
+              );
+
+        bubbleChartData.push({
+          itemName: dimensionValue,
+          value:
+            config["size_by"] === undefined || !row[config["size_by"]]
+              ? firstMeasureValue
+              : row[config["size_by"]].value,
+          rendered: rendered_val
+            ? rendered_val
+            : LookerCharts.Utils.textForCell(
+                config["size_by"] === undefined || !row[config["size_by"]]
+                  ? (row[firstMeasure.name] || {})
+                  : row[config["size_by"]]
+              ),
+          color: color,
+          html: firstMeasureHtml,
+          secondMeasureRendered: second_measure_rendered_val
+            ? second_measure_rendered_val : secondMeasureValue,
+          secondMeasureHtml: secondMeasureHtml
+        });
       });
-    });
 
-    // console.log(Math.max.apply(null, maxColor));
-    // Finally update the state with our new data
-    this.chart = ReactDOM.render(
-      <BubbleChart
-        config={config}
-        data={bubbleChartData}
-        maxColor={Math.max.apply(null, maxColor)}
-      />,
-      element
-    );
+      // Finally update the state with our new data
+      this.chart = ReactDOM.render(
+        <BubbleChart
+          config={config}
+          data={bubbleChartData}
+          maxColor={Math.max(...maxColor)}
+        />,
+        element
+      );
 
-    // We are done rendering! Let Looker know.
-    done();
+      // We are done rendering! Let Looker know.
+      done();
+    } catch (error) {
+      this.addError({
+        title: "Rendering Error",
+        message: error.message,
+      });
+      done();
+    }
   },
 });
