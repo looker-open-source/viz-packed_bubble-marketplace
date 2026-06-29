@@ -45,17 +45,6 @@ class BubbleChart extends Component {
   }
 
   drawChart(id) {
-    function getDivWidth(div) {
-      var width = d3
-        .select(div)
-        // get the width of div element
-        .style("width")
-        // take of 'px'
-        .slice(0, -2);
-      // return as an integer
-      return Math.round(Number(width));
-    }
-
     const { config, data } = this.props;
 
     // Catches edge case for unregistered config/options on dashboard-next
@@ -145,7 +134,7 @@ class BubbleChart extends Component {
           return config.toColor[0];
         }
       })
-      .on("mousemove", function (d) {
+      .on("mousemove", function (event, d) {
         d3.select(this)
           .style("stroke-width", 10) // set the stroke width
           .style("stroke", function (d) {
@@ -167,7 +156,7 @@ class BubbleChart extends Component {
               : (d.data.color * 2) / maxColor;
           });
       })
-      .on("mouseout", function (d) {
+      .on("mouseout", function (event, d) {
         d3.select(this)
           .style("z-index", 1)
           .style("stroke-width", 0)
@@ -209,8 +198,10 @@ class BubbleChart extends Component {
     }
 
     node
-      .on("mousemove", function (d) {
-        d3.select("#chart").append("div").attr("id", "tooltip");
+      .on("mousemove", function (event, d) {
+        if (d3.select("#tooltip").empty()) {
+          d3.select("#chart").append("div").attr("id", "tooltip");
+        }
         let tooltip_html = "";
         tooltip_html += "<div><span>" + d.data.itemName + "<br/></span>";
         tooltip_html += "<span>   " + (d.data.html ? DOMPurify.sanitize(d.data.html) : d.data.rendered) + "<br/></span>";
@@ -227,9 +218,9 @@ class BubbleChart extends Component {
           // mysterious reasons. The ternary here just prevents that from happening.
           .style(
             "left",
-            d3.event.pageX - (centerX > 100 ? 30 : centerX + 5) + "px"
+            event.pageX - (centerX > 100 ? 30 : centerX + 5) + "px"
           ) //
-          .style("top", d3.event.pageY - 60 + "px")
+          .style("top", event.pageY - 60 + "px")
           .style("opacity", 1)
           .style("position", "absolute")
           .style("font-family", "Roboto")
@@ -254,7 +245,7 @@ class BubbleChart extends Component {
           .style("width", 5)
           .style("position", "absolute");
       })
-      .on("mouseout", function (d) {
+      .on("mouseout", function () {
         // Need to remove all tooltips or we end up with
         // endless tooltips in the DOM
         d3.selectAll("#tooltip").remove();
