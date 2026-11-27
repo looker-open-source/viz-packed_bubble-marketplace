@@ -16,6 +16,17 @@ const BubbleChartWrapper = styled.div`
   overflow: hidden;
 `;
 
+const formatFontSize = (value) => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const trimmed = String(value).trim();
+  if (!trimmed) {
+    return null;
+  }
+  return /^(?:\d+\.?\d*|\.\d+)$/.test(trimmed) ? `${trimmed}px` : trimmed;
+};
+
 class BubbleChart extends Component {
   componentDidMount() {
     this.drawChartWithParams();
@@ -173,24 +184,24 @@ class BubbleChart extends Component {
           });
       });
 
-    if (config["value_titles"] !== false) {
+    if (config["value_labels"] !== false) {
       node
         .append("text")
         .attr("class", "label")
-        .attr("dy", config["value_labels"] === false ? ".3em" : ".1em")
+        .attr("dy", config["value_titles"] === false ? ".3em" : ".1em")
         .style("text-anchor", "middle")
-        .style("font-size", config["font_size_value"])
+        .style("font-size", formatFontSize(config["font_size_value"]))
         .text(function (d) {
           return d.data.itemName.substring(0, d.r / 3);
         });
     }
 
-    if (config["value_labels"] !== false) {
+    if (config["value_titles"] !== false) {
       node
         .append("text")
         .attr("class", "label")
-        .attr("dy", config["value_titles"] === false ? ".3em" : "1.5em")
-        .style("font-size", config["font_size_label"])
+        .attr("dy", config["value_labels"] === false ? ".3em" : "1.5em")
+        .style("font-size", formatFontSize(config["font_size_label"]))
         .style("text-anchor", "middle")
         .text(function (d) {
           return d.data.rendered;
