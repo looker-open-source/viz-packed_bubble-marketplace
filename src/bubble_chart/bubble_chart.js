@@ -173,11 +173,11 @@ class BubbleChart extends Component {
           });
       });
 
-    if (config["value_titles"] !== false) {
+    if (config["value_labels"] !== false) {
       node
         .append("text")
         .attr("class", "label")
-        .attr("dy", config["value_labels"] === false ? ".3em" : ".1em")
+        .attr("dy", config["value_titles"] === false ? ".3em" : ".1em")
         .style("text-anchor", "middle")
         .style("font-size", config["font_size_value"])
         .text(function (d) {
@@ -185,11 +185,11 @@ class BubbleChart extends Component {
         });
     }
 
-    if (config["value_labels"] !== false) {
+    if (config["value_titles"] !== false) {
       node
         .append("text")
         .attr("class", "label")
-        .attr("dy", config["value_titles"] === false ? ".3em" : "1.5em")
+        .attr("dy", config["value_labels"] === false ? ".3em" : "1.5em")
         .style("font-size", config["font_size_label"])
         .style("text-anchor", "middle")
         .text(function (d) {
